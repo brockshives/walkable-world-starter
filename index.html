@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Walkable World</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <!-- top-center title -->
+    <div id="title-chip" class="chip">MY WORLD</div>
+
+    <!-- top-left HUD (fps · mode · players online) -->
+    <div id="hud" class="chip"></div>
+
+    <!-- graphics quality: AUTO adapts by FPS; manual picks stick -->
+    <button id="gfx-btn" type="button" title="Graphics quality — click to cycle (reloads)">GFX AUTO</button>
+
+    <!-- top-center toasts -->
+    <div id="toasts"></div>
+
+    <!-- bottom-center: interaction prompt + hint bar -->
+    <div id="prompt" class="hidden"></div>
+    <div id="hint-bar">WASD — WALK · SHIFT — RUN · C — MOUSE LOOK · HOLD RIGHT-CLICK — PEEK · SPACE — JUMP · E / CLICK — OPEN · ENTER — CHAT · V — VOICE · H — HELP</div>
+    <!-- crosshair: shown while mouse-look has the cursor captured -->
+    <div id="crosshair"></div>
+
+    <!-- world chat (bottom-left) + voice indicator -->
+    <div id="chat">
+      <div id="chat-log"></div>
+      <div id="chat-row" class="hidden">
+        <span id="chat-tag">▸</span>
+        <input id="chat-input" maxlength="200" autocomplete="off" />
+      </div>
+    </div>
+    <div id="voice-chip" class="hidden">🎤 VOICE ON · V TO MUTE</div>
+
+    <!-- intro / help card -->
+    <div id="intro" class="modal">
+      <div class="panel intro-panel">
+        <div class="kicker">WELCOME TO</div>
+        <h1 id="intro-title">MY WORLD</h1>
+        <div class="sub" id="intro-tagline">A WALKABLE PLACE ON THE WEB</div>
+        <div class="controls-grid">
+          <span><b>WASD</b> — walk · <b>SHIFT</b> — run</span>
+          <span><b>C</b> — mouse look (or hold right-click)</span>
+          <span><b>SPACE</b> — jump</span>
+          <span><b>E</b> — interact</span>
+          <span><b>CLICK KIOSKS &amp; POSTERS</b> — open links</span>
+        </div>
+        <button id="enter-btn">ENTER</button>
+        <label class="slider-row" title="Mouse-look sensitivity — applies instantly, saved per browser">
+          <span>MOUSE SENSE</span>
+          <input id="sens-slider" type="range" min="0.3" max="2.5" step="0.05" />
+          <span id="sens-val">100%</span>
+        </label>
+        <label class="slider-row" title="Field of view — horizontal degrees (90 = classic), saved per browser">
+          <span>FOV</span>
+          <input id="fov-slider" type="range" min="80" max="120" step="1" />
+          <span id="fov-val">90°</span>
+        </label>
+        <div class="tip">Extras: R — respawn · F — free-fly cam · O — orbit cam · ENTER — chat · V — voice</div>
+      </div>
+    </div>
+
+    <!-- link card (one link) -->
+    <div id="portal-modal" class="modal hidden">
+      <div class="panel portal-panel">
+        <h2 id="card-title"></h2>
+        <p id="card-desc"></p>
+        <a id="card-link" href="#" target="_blank" rel="noopener noreferrer">ENTER →</a>
+        <button id="card-close" type="button">← BACK</button>
+      </div>
+    </div>
+
+    <!-- link menu (many links) -->
+    <div id="menu-modal" class="modal hidden">
+      <div class="panel menu-panel">
+        <button id="menu-x" type="button" title="Close">✕</button>
+        <h2 id="menu-title"></h2>
+        <div id="menu-body"></div>
+        <button id="menu-close" type="button">← BACK</button>
+      </div>
+    </div>
+
+    <!-- fullscreen overlay (WebGL failure) -->
+    <div id="overlay" class="hidden">
+      <div class="panel" id="overlay-content"></div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

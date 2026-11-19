@@ -1,0 +1,380 @@
+/* Retro HUD + modals.
+   SCALING RULE: every panel takes its size from ONE clamp()-based font size
+   (--ui) and everything inside is in em. A panel then occupies the same
+   share of the screen at 1080p, 1440p and 4K. Fixed-pixel panels look tiny
+   on big screens — don't write them. */
+
+:root {
+  --ui: clamp(15px, 1.02vw, 34px);
+  --ink: #e8edf4;
+  --dim: #9fc4d8;
+  --gold: #ffc233;
+  --line: #2b3b4c;
+  --panel: rgba(11, 14, 20, 0.94);
+  --font: 'VT323', ui-monospace, 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #0b0e14;
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--ui);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#app, #app canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+#app canvas { cursor: grab; }
+#app canvas.hot { cursor: pointer; }
+#app canvas.dragging { cursor: grabbing; }
+
+.hidden { display: none !important; }
+
+/* ---------- chips ---------- */
+.chip {
+  position: fixed;
+  top: 0.7em;
+  padding: 0.25em 0.8em;
+  background: rgba(11, 14, 20, 0.78);
+  border: 2px solid var(--line);
+  color: var(--dim);
+  letter-spacing: 0.06em;
+  z-index: 20;
+  pointer-events: none;
+}
+#title-chip { left: 50%; transform: translateX(-50%); color: var(--gold); font-size: 1.25em; }
+#hud { left: 0.7em; font-size: 1.05em; }
+#hud b { color: var(--ink); font-weight: normal; }
+
+#gfx-btn {
+  position: fixed;
+  top: 0.7em;
+  right: 0.7em;
+  z-index: 21;
+  font: inherit;
+  font-size: 1.05em;
+  padding: 0.25em 0.8em;
+  background: rgba(11, 14, 20, 0.78);
+  border: 2px solid var(--line);
+  color: var(--dim);
+  cursor: pointer;
+}
+#gfx-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ---------- toasts / prompt / hints ---------- */
+#toasts {
+  position: fixed;
+  top: 3.6em;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35em;
+  z-index: 30;
+  pointer-events: none;
+}
+.toast {
+  padding: 0.3em 1em;
+  background: var(--panel);
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  font-size: 1.2em;
+  letter-spacing: 0.05em;
+  transition: opacity 0.6s;
+  text-align: center;
+  max-width: 92vw;
+}
+
+#prompt {
+  position: fixed;
+  bottom: 4.2em;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.3em 1.1em;
+  background: var(--gold);
+  color: #14110a;
+  font-size: 1.5em;
+  letter-spacing: 0.05em;
+  z-index: 25;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+#hint-bar {
+  position: fixed;
+  bottom: 0.7em;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25em 0.9em;
+  background: rgba(11, 14, 20, 0.7);
+  border: 2px solid var(--line);
+  color: var(--dim);
+  font-size: 0.95em;
+  letter-spacing: 0.04em;
+  z-index: 20;
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: 96vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#crosshair {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45);
+  z-index: 22;
+  pointer-events: none;
+  display: none;
+}
+#crosshair.on { display: block; }
+
+/* ---------- chat + voice ---------- */
+#chat {
+  position: fixed;
+  left: 0.7em;
+  bottom: 3.4em;
+  width: min(30em, 80vw);
+  z-index: 24;
+  pointer-events: none;
+}
+#chat-log {
+  max-height: 11em;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.chat-line {
+  padding: 0.05em 0.4em;
+  background: rgba(11, 14, 20, 0.55);
+  font-size: 1.1em;
+  transition: opacity 1.2s;
+  overflow-wrap: anywhere;
+}
+.chat-line b { color: #9fd8ff; font-weight: normal; }
+.chat-line.mine b { color: var(--gold); }
+.chat-line.sys { color: var(--dim); }
+.chat-line.faded { opacity: 0; }
+#chat.chat-open .chat-line.faded { opacity: 1; }
+#chat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-top: 0.25em;
+  padding: 0.15em 0.4em;
+  background: var(--panel);
+  border: 2px solid var(--gold);
+  pointer-events: auto;
+}
+#chat-tag { color: var(--gold); white-space: nowrap; }
+#chat-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.1em;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+#voice-chip {
+  position: fixed;
+  left: 0.7em;
+  top: 3.4em;
+  padding: 0.2em 0.7em;
+  background: var(--panel);
+  border: 2px solid #35ff7a;
+  color: #8dffb8;
+  z-index: 24;
+  pointer-events: none;
+}
+
+/* ---------- modals ---------- */
+.modal, #overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 7, 11, 0.55);
+  z-index: 50;
+}
+.panel {
+  position: relative;
+  width: min(94vw, 34em);
+  max-height: 92vh;
+  overflow: auto;
+  padding: 1.2em 1.5em 1.3em;
+  background: var(--panel);
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 0 3px #0b0e14, 0.5em 0.5em 0 rgba(0, 0, 0, 0.45);
+  text-align: center;
+}
+.panel h1 { margin: 0; font-size: 3.6em; font-weight: normal; color: var(--gold); letter-spacing: 0.06em; line-height: 1; }
+.panel h2 { margin: 0 0 0.3em; font-size: 2.2em; font-weight: normal; color: var(--gold); letter-spacing: 0.05em; }
+.panel p { margin: 0.2em 0 0.9em; font-size: 1.25em; color: var(--ink); }
+.kicker { color: var(--dim); letter-spacing: 0.2em; }
+.sub { color: var(--dim); margin: 0.2em 0 0.9em; letter-spacing: 0.08em; }
+.tip { margin-top: 0.8em; color: var(--dim); font-size: 0.95em; }
+
+.controls-grid {
+  display: grid;
+  gap: 0.15em;
+  margin: 0.4em 0 1em;
+  font-size: 1.15em;
+  color: var(--ink);
+}
+.controls-grid b { color: var(--gold); font-weight: normal; }
+
+.panel button, .panel a#card-link, .menu-btn {
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+#enter-btn, #card-link {
+  margin: 0.2em 0 0.7em;
+  padding: 0.25em 1.6em;
+  font-size: 1.9em;
+  background: var(--gold);
+  color: #14110a;
+  border: 0;
+  letter-spacing: 0.06em;
+}
+#enter-btn:hover, #card-link:hover { background: #ffd866; }
+#enter-btn.loading { background: #57606b; color: #c8d0da; cursor: wait; }
+#card-close, #menu-close {
+  display: block;
+  margin: 0.3em auto 0;
+  padding: 0.2em 1em;
+  font-size: 1.15em;
+  background: transparent;
+  color: var(--dim);
+  border: 2px solid var(--line);
+}
+#card-close:hover, #menu-close:hover { color: var(--ink); border-color: var(--dim); }
+#menu-x {
+  position: absolute;
+  top: 0.4em;
+  right: 0.5em;
+  font-size: 1.3em;
+  background: transparent;
+  color: var(--dim);
+  border: 0;
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7em;
+  margin: 0.25em 0;
+  color: var(--dim);
+}
+.slider-row input { width: 12em; accent-color: var(--gold); }
+.slider-row span:last-child { min-width: 3.2em; text-align: left; color: var(--ink); }
+
+/* link menu */
+.menu-panel { width: min(94vw, 40em); text-align: left; }
+.menu-panel h2 { text-align: center; }
+#menu-body { max-height: 62vh; overflow: auto; margin-bottom: 0.8em; }
+.menu-section {
+  margin: 0.8em 0 0.3em;
+  padding-bottom: 0.1em;
+  color: var(--dim);
+  letter-spacing: 0.14em;
+  border-bottom: 2px solid var(--line);
+}
+.menu-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.22em 0.2em;
+  font-size: 1.2em;
+}
+.menu-row:hover { background: rgba(255, 194, 51, 0.07); }
+.menu-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu-btn {
+  padding: 0.05em 0.6em;
+  background: var(--gold);
+  color: #14110a;
+  border: 2px solid var(--gold);
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+.menu-btn.ghost { background: transparent; color: var(--dim); border-color: var(--line); }
+.menu-btn.ghost:hover { color: var(--ink); border-color: var(--dim); }
+
+#overlay .panel { text-align: left; }
+#overlay ol { font-size: 1.15em; padding-left: 1.3em; }
+
+/* ---------- touch controls (touch.js builds the DOM) ---------- */
+#touch-ui { position: fixed; inset: 0; z-index: 23; pointer-events: none; }
+#touch-ui.ui-hidden { display: none; }
+#stick-base {
+  position: fixed;
+  width: 112px;
+  height: 112px;
+  margin: -56px 0 0 -56px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: rgba(11, 14, 20, 0.3);
+  display: none;
+}
+#stick-base.on { display: block; }
+#stick-nub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 194, 51, 0.75);
+  transform: translate(-50%, -50%);
+}
+#touch-btns {
+  position: fixed;
+  right: 1em;
+  bottom: 4.6em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  pointer-events: auto;
+}
+.tbtn {
+  width: 4.6em;
+  height: 4.6em;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: rgba(11, 14, 20, 0.5);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.1em;
+}
+.tbtn span { display: block; font-size: 0.8em; color: var(--dim); }
+.tbtn.pressed { background: rgba(255, 194, 51, 0.6); color: #14110a; }
+body.touch #hint-bar { font-size: 0.85em; }
+body.touch #gfx-btn { display: none; }

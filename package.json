@@ -1,0 +1,24 @@
+{
+  "name": "walkable-world-starter",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Starter kit for a walkable first-person 3D world in the browser: procedural three.js, Counter-Strike-style movement, kiosks that open links, multiplayer ghosts, chat and proximity voice.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "node server.js",
+    "start": "npm run build && node server.js",
+    "scrub": "node scripts/scrub.mjs",
+    "verify": "node scripts/verify.mjs"
+  },
+  "dependencies": {
+    "three": "^0.185.1",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "vite": "^8.1.3"
+  }
+}

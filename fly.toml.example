@@ -1,0 +1,26 @@
+# Example Fly.io config (any container host works the same way).
+# Copy to fly.toml, pick your own app name, then:
+#   fly launch --no-deploy --copy-config
+#   fly secrets set UNLOCK_TOKEN=<long random string>
+#   fly deploy --ha=false
+# Keep a SINGLE machine (--ha=false): presence state is in memory, so two
+# machines means two separate worlds.
+app = "your-world-name"
+primary_region = "ord"
+
+[build]
+
+[env]
+  # Fly sets this header to the real client IP; the server only trusts a
+  # proxy header that you name here.
+  TRUST_PROXY_HEADER = "fly-client-ip"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[vm]]
+  size = "shared-cpu-1x"

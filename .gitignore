@@ -1,0 +1,27 @@
+# dependencies
+node_modules
+
+# build output
+dist
+
+# secrets — never commit keys or tokens
+.env
+.env.*
+
+# your real private link data (names, internal URLs). It ships to your host
+# inside the container image, NEVER to a git remote. See private.example/.
+private/
+
+# your real deploy config (app names etc.)
+fly.toml
+
+# your private word list for `npm run scrub` — a list of secrets is a secret
+scrub-words.txt
+
+# test output
+verify-*.png
+
+# editor / os noise
+.DS_Store
+Thumbs.db
+*.log

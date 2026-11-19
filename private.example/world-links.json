@@ -1,0 +1,21 @@
+{
+  "_readme": "Copy this folder to private/ (which is git-ignored) and put your real names and links here. The server sends this file ONLY to visitors who opened /unlock/<UNLOCK_TOKEN> or come from an ALLOW_IPS address. Keys under 'stations' match the privateId of a hotspot in src/config.js.",
+  "stations": {
+    "members": {
+      "name": "MEMBERS LOUNGE",
+      "desc": "Links only members can see.",
+      "menu": {
+        "title": "MEMBERS LOUNGE",
+        "sections": [
+          {
+            "title": "EXAMPLE SECTION",
+            "items": [
+              { "label": "Example private link", "url": "https://example.com/" },
+              { "label": "Another one", "url": "https://example.org/" }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
